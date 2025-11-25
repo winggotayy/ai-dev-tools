@@ -2,4 +2,4 @@
 
 HOMEWORK FOR:
 
-1. MODULE 1 - build a TODO application in Django. (Done)
+1. MODULE 1 - build a TODO application in Django. (Submitted)
