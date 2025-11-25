@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}TODO List - TODO App{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>📋 My TODOs</h1>
+        <p class="text-muted">Manage your tasks efficiently</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'create_todo' %}" class="btn btn-primary btn-lg">+ New TODO</a>
+    </div>
+</div>
+
+{% if todos %}
+    <!-- Unresolved TODOs -->
+    {% regroup todos by is_resolved as todos_by_status %}
+    {% for status_group in todos_by_status %}
+        {% if not status_group.grouper %}
+            <h3 class="mt-4 mb-3">📌 Active TODOs</h3>
+            <div class="row">
+                {% for todo in status_group.list %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ todo.title }}</h5>
+                                {% if todo.description %}
+                                    <p class="card-text text-muted small">{{ todo.description|truncatewords:20 }}</p>
+                                {% endif %}
+                                {% if todo.due_date %}
+                                    <small class="text-warning">
+                                        📅 Due: {{ todo.due_date|date:"M d, Y H:i" }}
+                                    </small>
+                                {% endif %}
+                                <div class="d-flex gap-2 mt-3">
+                                    <form action="{% url 'toggle_resolved' todo.pk %}" method="post" style="flex: 1;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success w-100">✓ Resolve</button>
+                                    </form>
+                                    <a href="{% url 'edit_todo' todo.pk %}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                                    <a href="{% url 'delete_todo' todo.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h3 class="mt-4 mb-3">✅ Resolved TODOs</h3>
+            <div class="row">
+                {% for todo in status_group.list %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm border-0" style="opacity: 0.7;">
+                            <div class="card-body">
+                                <h5 class="card-title"><s>{{ todo.title }}</s></h5>
+                                {% if todo.description %}
+                                    <p class="card-text text-muted small"><s>{{ todo.description|truncatewords:20 }}</s></p>
+                                {% endif %}
+                                <div class="d-flex gap-2 mt-3">
+                                    <form action="{% url 'toggle_resolved' todo.pk %}" method="post" style="flex: 1;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-secondary w-100">↩️ Unresolve</button>
+                                    </form>
+                                    <a href="{% url 'delete_todo' todo.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info text-center py-5">
+        <h4>📭 No TODOs yet</h4>
+        <p>Create your first TODO to get started!</p>
+        <a href="{% url 'create_todo' %}" class="btn btn-primary">Create TODO</a>
+    </div>
+{% endif %}
+{% endblock %}
